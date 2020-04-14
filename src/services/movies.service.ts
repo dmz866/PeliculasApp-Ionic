@@ -10,6 +10,7 @@ const MOVIEDB_API_KEY = environment.apiKey;
   providedIn: 'root'
 })
 export class MoviesService {
+  private popularesPage = 0;
   
   constructor(private http: HttpClient) { }
 
@@ -20,6 +21,23 @@ export class MoviesService {
   }
 
   getFeature() {
-    return this.ejecutarQuery<RespuestaMDB>('/discover/movie?primary_release_date.gte=2019-01-01');
+    const hoy = new Date();
+    const ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0).getDate();
+    const mes = hoy.getMonth() + 1;
+    let mesString;
+
+    if ( mes < 10) {
+      mesString = (mes < 10) ? ('0' + mes) : mes;
+    }
+
+    const inicio = `${hoy.getFullYear()}-${mesString}-01`;
+    const final = `${hoy.getFullYear()}-${mesString}-${ultimoDia}`;
+
+    return this.ejecutarQuery<RespuestaMDB>(`/discover/movie?primary_release_date.gte=${inicio}&primary_release_date.lte=${final}`);
+  }
+
+  getPopulares() {
+    this.popularesPage++;
+    return this.ejecutarQuery<RespuestaMDB>(`/discover/movie?sort_by=popularity.desc&page=${this.popularesPage}`);
   }
 }
